@@ -14,27 +14,16 @@ class StokGuncelle(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        # Enstrüman adı etiketi ve giriş alanı oluştur
         self.label_enstruman = QLabel("Enstrüman Adı:", self)
         self.input_enstruman = QLineEdit(self)
-
-        # Stok adedi etiketi ve giriş alanı oluştur
         self.label_stok_adedi = QLabel("Stok Adedi:", self)
         self.input_stok_adedi = QLineEdit(self)
-
-        # Fiyat etiketi ve giriş alanı oluştur
         self.label_fiyat = QLabel("Fiyat:", self)
         self.input_fiyat = QLineEdit(self)
-
-        # Kaydet butonu oluştur
         btn_kaydet = QPushButton("Kaydet", self)
         btn_kaydet.clicked.connect(self.stok_guncelle)
-
-        # Tablo oluştur
         self.tableWidget = QTableWidget()
-        self.tableWidget.setColumnCount(3)  # 3 sütun: Enstrüman Adı, Stok Adedi, Fiyat
-
-        # Dikey bir düzen oluştur
+        self.tableWidget.setColumnCount(3)
         layout = QVBoxLayout()
         layout.addWidget(self.label_enstruman)
         layout.addWidget(self.input_enstruman)
@@ -44,56 +33,35 @@ class StokGuncelle(QWidget):
         layout.addWidget(self.input_fiyat)
         layout.addWidget(btn_kaydet)
         layout.addWidget(self.tableWidget)
-
-        # Arka plan rengini değiştir
         palette = self.palette()
         palette.setColor(QPalette.Window, QColor(240, 240, 240))
         self.setPalette(palette)
-
         self.setLayout(layout)
-
-        # Tabloyu doldur
         self.tabloyu_doldur()
 
     def stok_guncelle(self):
-        # Veritabanına bağlan
         conn = sqlite3.connect('stok_veritabani.db')
         cursor = conn.cursor()
-
-        # Enstrüman adı, stok adedi ve fiyat bilgilerini al
         enstruman_adı = self.input_enstruman.text()
         stok_adedi = self.input_stok_adedi.text()
         fiyat = self.input_fiyat.text()
-
-        # Veritabanına bilgileri ekle
         cursor.execute("INSERT INTO stok (enstruman_adı, stok_adedi, fiyat) VALUES (?, ?, ?)", (enstruman_adı, stok_adedi, fiyat))
         conn.commit()
-
-        # Tabloyu güncelle
         self.tabloyu_doldur()
-
         conn.close()
-
-        # Bilgi mesajı göster
         QMessageBox.information(self, "Stok Güncelleme", f"Stok güncellendi:\nEnstrüman Adı: {enstruman_adı}\nStok Adedi: {stok_adedi}\nFiyat: {fiyat}")
 
     def tabloyu_doldur(self):
-        # Veritabanından verileri al
         conn = sqlite3.connect('stok_veritabani.db')
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM stok")
         rows = cursor.fetchall()
         conn.close()
-
-        # Tabloyu temizle
         self.tableWidget.setRowCount(0)
-
-        # Verileri tabloya ekle
         for row_number, row_data in enumerate(rows):
             self.tableWidget.insertRow(row_number)
             for column_number, data in enumerate(row_data):
                 self.tableWidget.setItem(row_number, column_number, QTableWidgetItem(str(data)))
-
 
 class AnaArayuz(QWidget):
     def __init__(self):
@@ -101,30 +69,23 @@ class AnaArayuz(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        self.setGeometry(100, 100, 800, 650)  # Pencere boyutunu ayarlar
-        self.setWindowTitle("ALYU Enstrümana Hoş Geldiniz")  # Pencere başlığını ayarlar
-
-        # Hoş geldiniz yazısı oluştur
+        self.setGeometry(100, 100, 800, 650)
+        self.setWindowTitle("ALYU Enstrümana Hoş Geldiniz")
         label_hosgeldiniz = QLabel("ALYU Enstrümana Hoş Geldiniz", self)
         label_hosgeldiniz.setAlignment(Qt.AlignCenter)
         label_hosgeldiniz.setStyleSheet("font-size: 42px; color: #333; font-weight: bold;")
-
         btn_musteri = QPushButton("Müşteri Girişi", self)
         btn_musteri.setStyleSheet("background-color: #007bff; color: white; font-weight: bold; border-radius: 10px;")
-        btn_musteri.setFixedHeight(40)  # Yüksekliği ayarla
+        btn_musteri.setFixedHeight(40)
         btn_musteri.clicked.connect(self.musteri_girisi_ac)
-
         btn_satici = QPushButton("Satıcı Girişi", self)
         btn_satici.setStyleSheet("background-color: #28a745; color: white; font-weight: bold; border-radius: 10px;")
-        btn_satici.setFixedHeight(40)  # Yüksekliği ayarla
+        btn_satici.setFixedHeight(40)
         btn_satici.clicked.connect(self.satici_girisi_ac)
-
-        # Dikey bir düzen oluştur
         layout = QVBoxLayout()
         layout.addWidget(label_hosgeldiniz)
         layout.addWidget(btn_musteri)
         layout.addWidget(btn_satici)
-
         self.setLayout(layout)
         self.show()
 
@@ -136,48 +97,35 @@ class AnaArayuz(QWidget):
         self.satici_girisi_pencere = SaticiGirisi()
         self.satici_girisi_pencere.show()
 
-
 class MusteriGirisi(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Müşteri Girişi")
         self.setGeometry(100, 100, 800, 650)
         self.init_ui()
-
         self.satinalinanlar_listesi = []
 
     def init_ui(self):
         btn_destek = QPushButton("Destek", self)
         btn_destek.setStyleSheet("background-color: #008CBA; color: white; font-weight: bold;")
         btn_destek.clicked.connect(self.destek_sayfasi_ac)
-
         self.tableWidget = QTableWidget()
         self.tableWidget.setColumnCount(3)
         self.tableWidget.setHorizontalHeaderLabels(["Ürün", "Adet", "Fiyat"])
-
-        # Tabloyu seçilebilir yap
         self.tableWidget.setSelectionBehavior(QTableWidget.SelectRows)
         self.tableWidget.setSelectionMode(QTableWidget.SingleSelection)
-
-        # Satın Al butonu oluştur
         btn_satinal = QPushButton("Satın Al", self)
         btn_satinal.clicked.connect(self.satinal)
-
-        # Satın Alınanlar butonu oluştur
         btn_satinalinanlar = QPushButton("Satın Alınanlar", self)
         btn_satinalinanlar.clicked.connect(self.satinalinanlar_goster)
-
-        # Butonları yatay bir düzen içinde yerleştir
         button_layout = QHBoxLayout()
         button_layout.addWidget(btn_destek)
         button_layout.addWidget(btn_satinal)
         button_layout.addWidget(btn_satinalinanlar)
-
         layout = QVBoxLayout()
         layout.addLayout(button_layout)
         layout.addWidget(self.tableWidget)
         self.setLayout(layout)
-
         self.veritabani_baglan()
 
     def veritabani_baglan(self):
@@ -206,7 +154,6 @@ class MusteriGirisi(QWidget):
             if adet_item is not None:
                 current_adet = int(adet_item.text())
                 if current_adet > 0:
-                    # Satın alma işlemi için onay iste
                     reply = QMessageBox.question(self, "Satın Alma Onayı",
                                                  f"Seçilen üründen bir tane satın almak istediğinize emin misiniz?",
                                                  QMessageBox.Yes | QMessageBox.No)
@@ -238,7 +185,6 @@ class MusteriGirisi(QWidget):
         else:
             QMessageBox.information(self, "Satın Alınanlar", "Henüz satın alınan bir ürün bulunmamaktadır.")
 
-
 class SaticiGirisi(QWidget):
     def __init__(self):
         super().__init__()
@@ -247,24 +193,15 @@ class SaticiGirisi(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        # TC etiketi ve giriş alanı oluştur
         label_tc = QLabel("TC:", self)
         self.input_tc = QLineEdit(self)
-
-        # Şifre etiketi ve giriş alanı oluştur
         label_sifre = QLabel("Şifre:", self)
         self.input_sifre = QLineEdit(self)
         self.input_sifre.setEchoMode(QLineEdit.Password)
-
-        # Kayıt ol butonu oluştur
         btn_kayit_ol = QPushButton("Kayıt Ol", self)
         btn_kayit_ol.clicked.connect(self.kayit_ol)
-
-        # Giriş yap butonu oluştur
         btn_giris = QPushButton("Giriş Yap", self)
         btn_giris.clicked.connect(self.giris_kontrol)
-
-        # Dikey bir düzen oluştur
         layout = QVBoxLayout()
         layout.addWidget(label_tc)
         layout.addWidget(self.input_tc)
@@ -272,42 +209,32 @@ class SaticiGirisi(QWidget):
         layout.addWidget(self.input_sifre)
         layout.addWidget(btn_kayit_ol)
         layout.addWidget(btn_giris)
-
         self.setLayout(layout)
 
     def giris_kontrol(self):
         tc = self.input_tc.text()
         sifre = self.input_sifre.text()
-
         if not tc or not sifre:
             QMessageBox.warning(self, "Eksik Bilgi", "Lütfen TC ve şifre alanlarını doldurun.")
             return
-
         if not self.kullanici_kayitli_mi(tc):
             QMessageBox.warning(self, "Kayıt Bulunamadı", "Giriş yapmak için önce kaydolmalısınız.")
             return
-
-        # Buraya gerçek giriş kontrolü yapılacak
-
         self.stok_guncelle_pencere = StokGuncelle()
         self.stok_guncelle_pencere.show()
         self.close()
 
     def kullanici_kayitli_mi(self, tc):
-        # Veritabanından kullanıcıyı sorgula
         conn = sqlite3.connect('kullanici_veritabani.db')
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM kullanicilar WHERE tc = ?", (tc,))
         user = cursor.fetchone()
         conn.close()
-
-        # Kullanıcı varsa True, yoksa False döndür
         return user is not None
 
     def kayit_ol(self):
         self.kayit_ol_penceresi = KayitOl()
         self.kayit_ol_penceresi.show()
-
 
 class KayitOl(QWidget):
     def __init__(self, parent=None):
@@ -317,28 +244,17 @@ class KayitOl(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        # TC etiketi ve giriş alanı oluştur
         self.label_tc = QLabel("TC:", self)
         self.input_tc = QLineEdit(self)
-
-        # İsim etiketi ve giriş alanı oluştur
         self.label_isim = QLabel("İsim:", self)
         self.input_isim = QLineEdit(self)
-
-        # Soyisim etiketi ve giriş alanı oluştur
         self.label_soyisim = QLabel("Soyisim:", self)
         self.input_soyisim = QLineEdit(self)
-
-        # Şifre etiketi ve giriş alanı oluştur
         self.label_sifre = QLabel("Şifre:", self)
         self.input_sifre = QLineEdit(self)
         self.input_sifre.setEchoMode(QLineEdit.Password)
-
-        # Kayıt ol butonu oluştur
         self.btn_kayit = QPushButton("Kayıt Ol", self)
         self.btn_kayit.clicked.connect(self.kayit_ol)
-
-        # Dikey bir düzen oluştur
         layout = QVBoxLayout()
         layout.addWidget(self.label_tc)
         layout.addWidget(self.input_tc)
@@ -349,7 +265,6 @@ class KayitOl(QWidget):
         layout.addWidget(self.label_sifre)
         layout.addWidget(self.input_sifre)
         layout.addWidget(self.btn_kayit)
-
         self.setLayout(layout)
 
     def kayit_ol(self):
@@ -357,66 +272,31 @@ class KayitOl(QWidget):
         isim = self.input_isim.text()
         soyisim = self.input_soyisim.text()
         sifre = self.input_sifre.text()
-
         if not tc or not isim or not soyisim or not sifre:
             QMessageBox.warning(self, "Eksik Bilgi", "Lütfen tüm alanları doldurun.")
             return
-
-        # Veritabanına kullanıcıyı ekle
         conn = sqlite3.connect('kullanici_veritabani.db')
         cursor = conn.cursor()
         cursor.execute("INSERT INTO kullanicilar (tc, isim, soyisim, sifre) VALUES (?, ?, ?, ?)", (tc, isim, soyisim, sifre))
         conn.commit()
         conn.close()
-
         QMessageBox.information(self, "Kayıt Başarılı", "Kayıt işlemi başarıyla tamamlandı.")
-
 
 class DestekSayfasi(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Destek")
-        self.setGeometry(100, 100, 800, 650)
+        self.setGeometry(100, 100, 300, 200)
         self.init_ui()
 
     def init_ui(self):
-        # Destek metni
-        self.destek_metni = QTextEdit(self)
-        self.destek_metni.setText("Buraya destek metni gelebilir.")
-
-        # Mesaj gönder butonu oluştur
-        btn_mesaj_gonder = QPushButton("Mesaj Gönder", self)
-        btn_mesaj_gonder.clicked.connect(self.mesaj_gonder)
-
-        # Dikey bir düzen oluştur
+        self.label_destek = QLabel("Destek Hattı: 123456789", self)
+        self.label_destek.setFont(QFont('Arial', 14))
         layout = QVBoxLayout()
-        layout.addWidget(self.destek_metni)
-        layout.addWidget(btn_mesaj_gonder)
+        layout.addWidget(self.label_destek)
         self.setLayout(layout)
 
-    def mesaj_gonder(self):
-        mesaj = self.destek_metni.toPlainText()
-        QMessageBox.information(self, "Mesaj Gönderildi", "Mesajınız satıcıya iletilmiştir.")
-
-
 if __name__ == '__main__':
-    conn = sqlite3.connect('stok_veritabani.db')
-    cursor = conn.cursor()
-    cursor.execute('''CREATE TABLE IF NOT EXISTS stok 
-                      (enstruman_adı TEXT, stok_adedi TEXT, fiyat TEXT)''')
-    conn.commit()
-    conn.close()
-
-    conn = sqlite3.connect('kullanici_veritabani.db')
-    cursor = conn.cursor()
-    cursor.execute('''CREATE TABLE IF NOT EXISTS kullanicilar 
-                      (tc TEXT PRIMARY KEY, isim TEXT, soyisim TEXT, sifre TEXT)''')
-    conn.commit()
-    conn.close()
-
     app = QApplication(sys.argv)
-
     ana_arayuz = AnaArayuz()
-    ana_arayuz.show()
-
     sys.exit(app.exec_())
